@@ -8,32 +8,22 @@ class SQLighter:
     def get_chat(self):
         """Получаем всех активных подписчиков бота"""
         with self.conn:
-            return self.cursor.execute('SELECT * FROM settings', (status)).fetchall()
-
+            return self.cursor.execute('SELECT * FROM settings').fetchall()
     def user_settings(self, user_id):
         with self.conn:
             result = self.cursor.execute('SELECT * FROM settings WHERE user_id=?', (user_id,)).fetchall()
+            return result
+    def add_user_settings(self, user_id, length=15, upper=True, lower=True, number=False, symbol=False):
+        with self.conn:
+            return self.cursor.execute('INSERT INTO settings (user_id, length, upper, lower, number, symbol) VALUES(?,?,?,?,?,?)', (user_id,length,upper,lower,number,symbol))
+    def update_user_settings(self, user_id, col, row):
+        with self.conn:
+            print(user_id, col, row)
+            return self.cursor.execute(f'UPDATE settings SET {col}=? WHERE user_id = ?', (row, user_id))   
+    def user_exists(self, user_id):
+        with self.conn:
+            result = self.cursor.execute('SELECT * FROM settings WHERE user_id=?', (user_id,)).fetchall()
             return bool(len(result))
-    def group_exists(self):
-        with self.conn:
-            result = self.cursor.execute('SELECT * FROM groups WHERE chat_id=?', (chat_id,)).fetchall()
-            return bool(len(result))
-
-    def get_group_status(self):
-        with self.conn:
-            result = self.cursor.execute('SELECT status FROM groups WHERE chat_id=?', (chat_id,)).fetchall()
-            for i in result:
-                for j in i:
-                    result = j
-            return bool(result)
-
-    def add_users(self):
-        with self.conn:
-            return self.cursor.execute('INSERT INTO users (user_id, chat_id, status, fullname) VALUES(?,?,?,?)', (user_id,chat_id,status,fullname))
-
-    def update_status_group(self):
-        with self.conn:
-            return self.cursor.execute('UPDATE groups SET status=? WHERE chat_id = ?', (status, chat_id))
     def close(self):
         """Закрываем соединение с БД"""
         self.conn.close()
